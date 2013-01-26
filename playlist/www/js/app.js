@@ -21,25 +21,21 @@ define(function(require) {
             d.getFullYear();
     }
 // Match a Youtube url pattern
-    var YOUTUBE = /(youtube.com(?:\/#)?\/watch\?)|(youtu\.be\/[A-Z0-9-_]+)/i;
+    var YOUTUBE = /youtube\.com(?:\/#)?\/watch\?v=([A-Z0-9-_]+)|youtu\.be\/([A-Z0-9-_]+)/i;
+    var VIMEO = /vimeo.com\/([A-Z0-9-_]+)/i;
 
     function generateVideo(url) {
-      var youtubeId;
+      var match_vimeo= url.match(VIMEO);
+      var match_youtube = url.match(YOUTUBE);
 
       // If a url pattern is matched, return the iframe - otherwise, return the string
-      if (url.match(YOUTUBE)) {
-        url = url.split('/');
-
-        //                         // Find the Youtube video id
-        if (url.indexOf('youtu.be') > -1) {
-          youtubeId = url[url.length - 1];
-        } else {
-          youtubeId = url[url.length - 1].split('v=')[1].split('&')[0];
-        }
-
+      if (match_youtube) {
+        var youtubeId = match_youtube[1]?match_youtube[1]:match_youtube[2];
         url = '<div class="video-wrapper"><iframe width="560" height="349" ' +
           'src="http://www.youtube.com/embed/' + youtubeId +
           '?wmode=transparent" frameborder="0" allowfullscreen></iframe></div>'
+      }else if (match_vimeo) {
+        url = '<div class="video-wrapper"><iframe src="http://player.vimeo.com/video/'+ match_vimeo[1]+ '?title=0&amp;byline=0" width="500" height="281" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe></div>';
       }
       return (url);
     }
@@ -47,26 +43,11 @@ define(function(require) {
     // List view
 
     var list = $('.list').get(0);
-    /*list.add({ title: 'Learn this template',
-               desc: 'This is a list-detail template. Learn more ' +
-                     'about it at its ' +
-                     '<a href="https://github.com/mozilla/mortar-list-detail">project page!</a>',
-               date: new Date() });
-    list.add({ title: 'Make things',
-               desc: 'Make this look like that',
-               date: new Date(12, 9, 5) });
-    for(var i=0; i<8; i++) {
-        list.add({ title: 'Move stuff',
-                   desc: 'Move this over there',
-                   date: new Date(12, 10, 1) });
-    }
-    */
     // Detail view
 
     var detail = $('.detail').get(0);
     detail.render = function(item) {
       $('.title', this).html(generateVideo(item.get('title')));
-
       $('.desc', this).html(item.get('desc'));
       $('.date', this).text(formatDate(item.get('date')));
     };
